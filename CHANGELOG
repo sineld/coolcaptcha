@@ -1,0 +1,36 @@
+CoolCaptcha v1.0	2012-09-29
+Sinan Eldem
+sinan@sinaneldem.com.tr
+https://github.com/sineld
+------------------------------------------------------------------------------
+First release. CoolCaptcha is based on an cool-php-captcha.
+
+Besides adapting it to Laravel, CoolCaptcha 1.0
+has the following improvements to cool-php-captcha:
+
++	Big usability improvements. CoolCaptcha actually works out of the box
+	and requires basically no configuration. Just one line added in
+	bundles.php for bundle loading - which is normal bundle procedure - 
+	and you are ready to go!
++	Security improvements: the generated captcha value was previously
+	stored in plain text. LaraCaptcha only stores a hash of the captcha,
+	and when validating, it compares the hash of the input with the hash
+	stored. Basically, this captcha is immune to session hijack.
+*	Many bug fixes
+*	Code cleanup, redundant code removed
+*	Improved documentation of functions
++	Readme file added, providing a quick info and installation guide
++	License file added
++	Changelog file added
++	Support for gif image producing
++	Jpeg file quality
++	All setting moved to config/config.php file
+-	Spanish sample words
++	Extra goodies from LaraCaptcha Bundle (Thanks to Vlad Rusu)
+
+
+Legend
+-----------------------------
++	Feature add
+*	Change/fix
+-	Feature removal
