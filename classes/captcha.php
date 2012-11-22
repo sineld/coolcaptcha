@@ -1,46 +1,22 @@
 <?php
 /**
- * Script para la generación de CAPTCHAS
+ * Cool Captcha Laravel Bundle base on Cool Php Captcha
  *
  * @author  Jose Rodriguez <jose.rodriguez@exec.cl>
  * @license GPLv3
  * @link    http://code.google.com/p/cool-php-captcha
  * @package captcha
  * @version 0.3
+ * 
+ * Laravel Bundle
+ * @author Sinan Eldem <sinan@sinaneldem.com.tr>
+ * @package coolcaptcha
+ * @version 1.1
  *
  */
-
 
 namespace CoolCaptcha;
 
-//se: $captcha = new Captcha();
-
-// OPTIONAL Change configuration...
-//$captcha->wordsFile = 'words/es.php';
-//$captcha->session_var = 'secretword';
-//$captcha->imageFormat = 'png';
-//$captcha->lineWidth = 3;
-//$captcha->scale = 3; $captcha->blur = true;
-//$captcha->resourcesPath = "/var/cool-php-captcha/resources";
-
-// OPTIONAL Simple autodetect language example
-/*
-if (!empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
-    $langs = array('en', 'es');
-    $lang  = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
-    if (in_array($lang, $langs)) {
-        $captcha->wordsFile = "words/$lang.php";
-    }
-}
-*/
-
-// Image generation
-//se: $captcha->generate();
-
-/**
- * Captcha class
- *
- */
 class Captcha {
 
     /** Width of the image */
@@ -59,7 +35,6 @@ class Captcha {
      * directory to another location outise the web server
      *
      */
- 
     public static $resourcesPath;
 
     /** Min word length (for non-dictionary random text generation) */
@@ -133,7 +108,6 @@ class Captcha {
     /** GD image */
     public static $im;
 
-
     public static $textFinalX = 200;
 
     /** GD BG Color */
@@ -147,67 +121,40 @@ class Captcha {
 
     final private function __construct() {}
 
-    /**
-     * Loads in the config and sets the variables
-     *
-     * @access  protected
-     * @return  void
-     */
     protected static function loadconfig()
     {
-        // load the config
         static::$config = \Config::get('coolcaptcha::config');
 
-        // update the defaults with the configed values
         foreach(static::$config as $key => $value)
         {
             static::${$key} = $value;
-            //print_r($value);
         }
     }
 
-    /**
-     * Returns an URL to the captcha image
-     * For example, you can use in your view something like
-     * <img src="<?php echo Captcha\Captcha::img(); ?>" alt="" />
-     *
-     * @access  public
-     * @return  string
-     */
     public static function img() {
-        return \URL::to('coolcaptcha?'.mt_rand(1, 100000)); //add a random number to avoid browser caching issues
+        return \URL::to('coolcaptcha?'.mt_rand(1, 100000));
     }
 
-/*
-    public static function sin()
+    public static function renewSession() 
     {
-        if (!isset(static::$resourcesPath)) static::loadconfig();
-        echo static::$resourcesPath.' selam';
+        $text = static::GetCaptchaText();
+        \Session::put(static::$session_var, \Hash::make($text));
     }
-*/
+
     public static function generate() 
     {
         if (!isset(static::$resourcesPath)) static::loadconfig();
 
         $ini = microtime(true);
 
-        /** Initialization */
         static::ImageAllocate();
         
-        /** Text insertion */
         $text = static::GetCaptchaText();
         $fontcfg  = static::$fonts[array_rand(static::$fonts)];
         static::WriteText($text, $fontcfg);
 
-        // $_SESSION[static::$session_var] = $text;
-
-        //echo $text.'<br>'.\Hash::make($text);
-        //die;
-
-        //Save to session
         \Session::put(static::$session_var, \Hash::make($text));
 
-        /** Transformations */
         if (!empty(static::$lineWidth)) {
             static::WriteLine();
         }
@@ -217,7 +164,6 @@ class Captcha {
         }
         static::ReduceImage();
 
-
         if (static::$debug) {
             imagestring(static::$im, 1, 1, static::$height-8,
                 "$text {$fontcfg['font']} ".round((microtime(true)-$ini)*1000)."ms",
@@ -225,20 +171,10 @@ class Captcha {
             );
         }
 
-
-        /** Output */
         static::WriteImage();
         static::Cleanup();
     }
 
-
-    /**
-     * Checks if the supplied captcha test value matches the stored one
-     *
-     * @param   string  $value
-     * @access  public
-     * @return  bool
-     */
     public static function check($value)
     {
         if (!isset(static::$session_var)) static::loadconfig();
@@ -247,19 +183,14 @@ class Captcha {
         return $value != null && $session_captcha_hash != null && \Hash::check($value, $session_captcha_hash);
     }
 
-    /**
-     * Creates the image resources
-     */
     public static function ImageAllocate()
     {
-        // Cleanup
         if (!empty(static::$im)) {
             imagedestroy(static::$im);
         }
 
         static::$im = imagecreatetruecolor(static::$width*static::$scale, static::$height*static::$scale);
 
-        // Background color
         static::$GdBgColor = imagecolorallocate(static::$im,
             static::$backgroundColor[0],
             static::$backgroundColor[1],
@@ -267,11 +198,9 @@ class Captcha {
         );
         imagefilledrectangle(static::$im, 0, 0, static::$width*static::$scale, static::$height*static::$scale, static::$GdBgColor);
 
-        // Foreground color
         $color           = static::$colors[mt_rand(0, sizeof(static::$colors)-1)];
         static::$GdFgColor = imagecolorallocate(static::$im, $color[0], $color[1], $color[2]);
 
-        // Shadow color
         if (!empty(static::$shadowColor) && is_array(static::$shadowColor) && sizeof(static::$shadowColor) >= 3) {
             static::$GdShadowColor = imagecolorallocate(static::$im,
                 static::$shadowColor[0],
@@ -281,11 +210,6 @@ class Captcha {
         }
     }
 
-    /**
-     * Text generation
-     *
-     * @return string Text
-     */
     public static function GetCaptchaText() {
         $text = static::GetDictionaryCaptchaText();
         if (!$text) {
@@ -294,11 +218,6 @@ class Captcha {
         return $text;
     }
 
-    /**
-     * Random text generation
-     *
-     * @return string Text
-     */
     public static function GetRandomCaptchaText($length = null) {
         if (empty($length)) {
             $length = rand(static::$minWordLength, static::$maxWordLength);
@@ -320,18 +239,11 @@ class Captcha {
         return $text;
     }
 
-    /**
-     * Random dictionary word generation
-     *
-     * @param boolean $extended Add extended "fake" words
-     * @return string Word
-     */
     public static function GetDictionaryCaptchaText($extended = false) {
         if (empty(static::$wordsFile)) {
             return false;
         }
 
-        // Full path of words file
         if (substr(static::$wordsFile, 0, 1) == '/') {
             $wordsfile = static::$wordsFile;
         } else {
@@ -354,8 +266,6 @@ class Captcha {
         $text = trim(fgets($fp));
         fclose($fp);
 
-
-        /** Change ramdom volcals */
         if ($extended) {
             $text   = preg_split('//', $text, -1, PREG_SPLIT_NO_EMPTY);
             $vocals = array('a', 'e', 'i', 'o', 'u');
@@ -370,9 +280,6 @@ class Captcha {
         return $text;
     }
 
-    /**
-     * Horizontal line insertion
-     */
     public static function WriteLine() {
 
         $x1 = static::$width*static::$scale*.15;
@@ -386,23 +293,16 @@ class Captcha {
         }
     }
 
-    /**
-     * Text insertion
-     */
     public static function WriteText($text, $fontcfg = array()) {
         if (empty(static::$fontcfg)) {
-            // Select the font configuration
             $fontcfg  = static::$fonts[array_rand(static::$fonts)];
         }
 
-        // Full path of font file
         $fontfile = static::$resourcesPath.'fonts/'.$fontcfg['font'];
 
-        /** Increase font-size for shortest words: 9% for each glyp missing */
         $lettersMissing = static::$maxWordLength-strlen($text);
         $fontSizefactor = 1+($lettersMissing*0.09);
 
-        // Text generation (char by char)
         $x      = 20*static::$scale;
         $y      = round((static::$height*27/40)*static::$scale);
         $length = strlen($text);
@@ -425,11 +325,7 @@ class Captcha {
         $textFinalX = $x;
     }
 
-    /**
-     * Wave filter
-     */
     public static function WaveImage() {
-        // X-axis wave generation
         $xp = static::$scale*static::$Xperiod*rand(1,3);
         $k = rand(0, 100);
         for ($i = 0; $i < (static::$width*static::$scale); $i++) {
@@ -438,7 +334,6 @@ class Captcha {
                 $i, 0, 1, static::$height*static::$scale);
         }
 
-        // Y-axis wave generation
         $k = rand(0, 100);
         $yp = static::$scale*static::$Yperiod*rand(1,2);
         for ($i = 0; $i < (static::$height*static::$scale); $i++) {
@@ -448,11 +343,7 @@ class Captcha {
         }
     }
 
-    /**
-     * Reduce the image to the final size
-     */
     public static function ReduceImage() {
-        // Reduzco el tamaño de la imagen
         $imResampled = imagecreatetruecolor(static::$width, static::$height);
         imagecopyresampled($imResampled, static::$im,
             0, 0, 0, 0,
@@ -463,11 +354,7 @@ class Captcha {
         static::$im = $imResampled;
     }
 
-    /**
-     * File generation
-     */
     public static function WriteImage() {
-        // Set no cache
         header('Cache-Control: no-cache, no-store, max-age=0, must-revalidate');
         header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
         header('Pragma: no-cache');
@@ -488,12 +375,7 @@ class Captcha {
         }
     }
 
-    /**
-     * Cleanup
-     */
     public static function Cleanup() {
         imagedestroy(static::$im);
     }
 }
-
-?>

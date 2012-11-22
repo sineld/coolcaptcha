@@ -1,9 +1,14 @@
-CoolCaptcha v1.0	2012-09-29
+CoolCaptcha v1.1	2012-11-22
 Sinan Eldem
 sinan@sinaneldem.com.tr
 https://github.com/sineld
 ------------------------------------------------------------------------------
 First release. CoolCaptcha is based on an cool-php-captcha.
+
+1.1
+
+*	Code cleanup
+*	Added renewSession method to renew current session for better security option. (Use this after successfully posted form to avoid repeated posts)
 
 Besides adapting it to Laravel, CoolCaptcha 1.0
 has the following improvements to cool-php-captcha:

@@ -1,4 +1,4 @@
-# CoolCaptcha Bundle
+# CoolCaptcha Bundle ver. 1.1
 CoolCaptcha is a captcha bundle for the Laravel framework. It does not require any external dependencies and is easy to use.
 
 ## Installation
