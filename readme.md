@@ -10,8 +10,9 @@ Note: **CoolCaptcha requires to have a Session Driver set**. Check /application/
 ## Bundle Registration
 
 Add the following to your **/application/bundles.php** file:
-
+```PHP
 	'coolcaptcha' => array('auto' => true, 'handles' => 'coolcaptcha'),
+```
 
 ## Usage
 
