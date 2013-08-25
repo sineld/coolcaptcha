@@ -10,13 +10,15 @@ Note: **CoolCaptcha requires to have a Session Driver set**. Check /application/
 ## Bundle Registration
 
 Add the following to your **/application/bundles.php** file:
-
+```PHP
 	'coolcaptcha' => array('auto' => true, 'handles' => 'coolcaptcha'),
+```
 
 ## Usage
 
 In **/application/routes.php** place something like:
 
+```PHP
 	// on "get" we display /views/layouts/register.php, which contains our registration form
 	Route::get('register', function()
 	{
@@ -43,17 +45,20 @@ In **/application/routes.php** place something like:
 			return Redirect::to('register')->with_errors($validation);
 		}
 	});
+```
 
 Feel free to add to the above code other validation rules according to your application.
 
 Next, in your view (say, **/views/layouts/register.php**), place something like:
 
+```PHP
 	echo Form::open('register', 'POST', array('class' => 'register_form'));
 	... [other fields] ...
 	echo Form::text('captcha', '', array('class' => 'captchainput', 'placeholder' => 'Insert captcha...'));
 	echo Form::image(CoolCaptcha\Captcha::img(), 'captcha', array('class' => 'captchaimg'));
 	... [other fields] ...
 	echo Form::close();
+```
 
 ## Customisation
 
