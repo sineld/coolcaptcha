@@ -322,7 +322,7 @@ class Captcha {
             $x += ($coords[2]-$x) + ($fontcfg['spacing']*static::$scale);
         }
 
-        $textFinalX = $x;
+          static::$textFinalX = $x;
     }
 
     public static function WaveImage() {
